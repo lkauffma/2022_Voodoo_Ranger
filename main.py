@@ -1,33 +1,24 @@
 #!/usr/bin/env pybricks-micropython
 
-from robot import Robot
+#from robot import Robot
+from vdr2022 import VDR2022
 from missions import eastern_adventure
 from missions import dead_reckon_helicopter
 from missions import blade
 
 # Create your objects here. test
-robot1 = Robot()
+#robot1 = Robot()
+vdr = VDR2022()
+
+# Go Go Voodoo Ranger! 
+# vdr.say("Go Go Voodoo Ranger")
 
 
-def watch_sensors():
-    robot1.watch_sensors()
-
-def follow_line_test():
-    robot1.follow_line_v1(distance=1500, right_or_left_sensor = "right", side_of_line = "left", Kp = .8, Ki = 0.000, Kd = 0.0, speed=120)
-
-
-
-# TO DO - Maybe replace this with some talking!  "Go Go Voodoo Ranger!" 
-
-
-# 2D List of menu items
-
-print(robot1.wait_for_button(["junk"]))
+# TO DO developing menu - move this to robot or vdt
+print(vdr.wait_for_button("junk1", "junk2", "junk3"))
 
 
 '''
-
-
 while True:
     # Draw screen based on what run we are on
     if run_number == 0:

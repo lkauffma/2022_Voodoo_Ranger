@@ -5,7 +5,7 @@ from pybricks.parameters import Port, Stop, Direction, Button, Color
 from pybricks.ev3devices import Motor, TouchSensor, ColorSensor, InfraredSensor, UltrasonicSensor, GyroSensor
 from pybricks.tools import wait, StopWatch, DataLog
 from pybricks.robotics import DriveBase
-from pybricks.media.ev3dev import SoundFile, ImageFile
+from pybricks.media.ev3dev import SoundFile, ImageFile, Font
 
 '''
 This is an API for any FLL robot.   
@@ -58,6 +58,7 @@ class Robot():
         self.left_line_sensor = ColorSensor(Port.S4)
         self.gyro_sensor = GyroSensor(Port.S2, Direction.CLOCKWISE)
         self.ultrasonic_sensor=UltrasonicSensor(Port.S3)
+
 
         # Initialize the drive base
 
@@ -282,6 +283,7 @@ class Robot():
 
 # Miscellaneous Methods =====================================================================================
 
+    
     def beep(self, frequency=500, duration=100):
         '''
         Parameters:	
@@ -291,7 +293,7 @@ class Robot():
         '''
         self.ev3.speaker.beep(frequency=500, duration=100)
 
-    def say(self, phrase = "Hello humans!"):
+    def say(self, phrase = "hello humans!"):
         self.ev3.speaker.say(phrase)
 
     def wait(self,time):
@@ -324,7 +326,7 @@ class Robot():
         while any(self.ev3.buttons.pressed()):
             pass  
 
-    def wait_for_button(self, screen_list):
+    def wait_for_button(self, right, middle, left):
     
         '''
         Displays a screen load with sensor values while 
@@ -335,13 +337,56 @@ class Robot():
 
         self.ev3.screen.clear()
 
-    
+        ls = self.left_line_sensor
+        rs = self.right_line_sensor
+        us = self.ultrasonic_sensor
+        gy = self.gyro_sensor
+
+        l = 0 # left line sensor value
+        r = 0 # right line sendor value 
+        u = 0 # middle ultrasonic value
+        g = 0 # gyro value
+        pl = 0 # previous left line sensor value
+        pr = 0 # previous right line sensor value
+        pu = 0 # previous ultrasonic value
+        pg = 0 # previous gyro value
+
         pressed = []
         while len(pressed) != 1:
-            self.ev3.screen.clear()
-            self.ev3.screen.draw_text(1, 1, self.left_line_sensor.reflection())
-            self.ev3.screen.draw_text(100, 1, self.right_line_sensor.reflection())
+
+            # read values
+            l = ls.reflection()
+            r = rs.reflection()
+            u = us.distance()
+            g = gy.angle()
+
+            if (l != pl) or (r != pr) or (u != pu) or (g != pg):
+                self.ev3.screen.clear()
+                self.ev3.screen.draw_text(1, 1, l)
+                self.ev3.screen.draw_text(70, 1, u)
+                self.ev3.screen.draw_text(150, 1, r)
+                self.ev3.screen.draw_text(75, 20, "Gyro:")
+                self.ev3.screen.draw_text(140, 20, g)
+
+            pl = l
+            pr = r
+            pu = u
+            pg = g
+
+            self.ev3.screen.draw_text(1, 20, "UP")
+            
+            self.ev3.screen.draw_text(1, 40, "LT=" + left)
+
+            self.ev3.screen.draw_text(1, 60, "MI=" + middle)
+
+            self.ev3.screen.draw_text(1, 80, "RT=" + right)
+            
+            self.ev3.screen.draw_text(1, 100, "DOWN ")
+
+
             pressed = self.ev3.buttons.pressed()
+
+            wait(500)
 
         button = pressed[0]
 
