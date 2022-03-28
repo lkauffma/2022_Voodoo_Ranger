@@ -1,11 +1,10 @@
 #!/usr/bin/env pybricks-micropython
 
-from pybricks.hubs import EV3Brick
-from pybricks.parameters import Port, Stop, Direction, Button, Color 
-from pybricks.ev3devices import Motor, TouchSensor, ColorSensor, InfraredSensor, UltrasonicSensor, GyroSensor
-from pybricks.tools import wait, StopWatch, DataLog
-from pybricks.robotics import DriveBase
-from pybricks.media.ev3dev import SoundFile, ImageFile
+'''
+This is team #C44519 Digital Voodo's 2022 Voodoo Ranger API.  This API is a Voodoo Ranger Specific class
+inherited from the more general robot class for any robot with tank wheels, right and left line sensors, 
+ultrasonic sensor, and gyro. 
+'''
 from robot import Robot
 
 class VDR2022(Robot):

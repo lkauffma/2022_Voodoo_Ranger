@@ -281,7 +281,9 @@ class Robot():
 
 # Driving Methods ===========================================================================================
 
-# Miscellaneous Methods =====================================================================================
+# Attachment Motor Methods ==================================================================================
+
+# Non-Driving Methods =======================================================================================
 
     
     def beep(self, frequency=500, duration=100):
@@ -396,3 +398,15 @@ class Robot():
 
         # Return which button was pressed & released
         return button
+
+    def menu_loop(menu_list):
+        # determine how long the menu list is
+        menu_length = 0
+
+        # keep track of menu positions
+        lp = 0 # lp = left button position
+        mp = 0 # mp = middle button position
+        rp = 0 # rp = right button position
+
+        # keep track of last button pressed
+        
