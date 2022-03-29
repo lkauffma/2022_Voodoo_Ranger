@@ -286,7 +286,7 @@ class Robot():
 # Non-Driving Methods =======================================================================================
 
     
-    def beep(self, frequency=500, duration=100):
+    def beep(self, frequency=500, duration=200):
         '''
         Parameters:	
             frequency (frequency: Hz) – Frequency of the beep. Frequencies below 100 are treated as 100.
@@ -328,13 +328,12 @@ class Robot():
         while any(self.ev3.buttons.pressed()):
             pass  
 
-    def wait_for_button(self, right, middle, left):
+    def wait_for_button(self, left, center, right):
     
         '''
-        Displays a screen load with sensor values while 
+        Displays a menu screen 
         Waiting for a button to be pressed
-    
-        When a button is pressed and relased, its name is returned 
+        Returns button pressed 
         '''
 
         self.ev3.screen.clear()
@@ -379,7 +378,7 @@ class Robot():
             
             self.ev3.screen.draw_text(1, 40, "LT=" + left)
 
-            self.ev3.screen.draw_text(1, 60, "MI=" + middle)
+            self.ev3.screen.draw_text(1, 60, "CT=" + center)
 
             self.ev3.screen.draw_text(1, 80, "RT=" + right)
             
@@ -399,14 +398,42 @@ class Robot():
         # Return which button was pressed & released
         return button
 
-    def menu_loop(menu_list):
-        # determine how long the menu list is
-        menu_length = 0
+    def menu_loop(self, menu_list):
+ 
+        menu_length = len(menu_list)
 
-        # keep track of menu positions
-        lp = 0 # lp = left button position
-        mp = 0 # mp = middle button position
-        rp = 0 # rp = right button position
+        p = 0  # starting menu position
+        lp = 0 # left button position
+        cp = 1 # middle button position
+        rp = 2 # right button position
 
-        # keep track of last button pressed
+        left = menu_list[lp][0]
+        center = menu_list[cp][0]
+        right = menu_list[rp][0]
+
+        # Infinite loop for now
+        while True:
+
+            # Wait for one button to be selected.
+            button = self.wait_for_button(left, center, right)
+
+            # Processing different kinds of selections
+            if button == Button.LEFT:
+                menu_list[lp][1]()
+                print(button)
+
+            elif button == Button.CENTER:
+                menu_list[cp][1]()
+                print(button)
+
+            elif button == Button.RIGHT:
+                menu_list[rp][1]()
+                print(button)
+
+            elif button == Button.UP:
+                print(button)
+
+            elif button == Button.DOWN:
+                print(button)
+
         
