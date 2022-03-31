@@ -387,7 +387,7 @@ class Robot():
 
             pressed = self.ev3.buttons.pressed()
 
-            wait(500)
+            wait(100)
 
         button = pressed[0]
 
@@ -418,22 +418,66 @@ class Robot():
             button = self.wait_for_button(left, center, right)
 
             # Processing different kinds of selections
+            # Selected item always moves to left button
             if button == Button.LEFT:
                 menu_list[lp][1]()
-                print(button)
+                # Don't advance the menu
+
+                left = menu_list[lp][0]
+                center = menu_list[cp][0]
+                right = menu_list[rp][0]
 
             elif button == Button.CENTER:
                 menu_list[cp][1]()
-                print(button)
+                # Advance the menu by 1
+                lp = cp
+                cp = rp
+                rp = rp + 1
+                if rp == menu_length:
+                    rp = 0
+
+                left = menu_list[lp][0]
+                center = menu_list[cp][0]
+                right = menu_list[rp][0]
 
             elif button == Button.RIGHT:
                 menu_list[rp][1]()
-                print(button)
+                # Advance the menu by 2
+                lp = rp
+                cp = rp + 1
+                rp = rp + 2
+                if rp == menu_length:
+                    cp = 0
+                    rp = 1
+
+                left = menu_list[lp][0]
+                center = menu_list[cp][0]
+                right = menu_list[rp][0]
 
             elif button == Button.UP:
                 print(button)
+                # Advance the menu by 1
+                lp = cp
+                cp = rp
+                rp = rp + 1
+                if rp == menu_length:
+                    rp = 0
+
+                left = menu_list[lp][0]
+                center = menu_list[cp][0]
+                right = menu_list[rp][0]
 
             elif button == Button.DOWN:
                 print(button)
+                # Decrease the menu by 1
+                rp = cp
+                cp = lp
+                lp = lp - 1
+                if lp < 0:
+                    lp = menu_length - 1
+                
+                left = menu_list[lp][0]
+                center = menu_list[cp][0]
+                right = menu_list[rp][0]
 
         
