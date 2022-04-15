@@ -66,3 +66,7 @@ def blade(robot):
     robot.wait(750)
     robot.drive(distance = 380, speed = 500, turn_rate = 10)
     robot.drive(distance = 500, speed = -500, turn_rate = 0)
+
+def test(robot):
+    robot.test_rear_attachment1()
+    robot.medium_attachment_motor.run_angle(1000, 601.2, then=robot.Stop.HOLD, wait=True)

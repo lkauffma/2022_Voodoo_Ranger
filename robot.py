@@ -8,50 +8,74 @@ from pybricks.robotics import DriveBase
 from pybricks.media.ev3dev import SoundFile, ImageFile, Font
 
 '''
-This is an API for any FLL robot.   
+This class can be used for any FLL robot.  Combines the different Pybricks API classes into one robot class.   
 
-Initially, it is being written for robots with:
-    2 large driving motors
-    1 large attachment motor
-    1 medium attachment motor
-    2 light sensors for line tracking
-    1 ultrasonic sensor
-    1 gyro sensor
+    Initially, it is being written for robots with:
+        2 large driving motors
+        1 large attachment motor
+        1 medium attachment motor
+        2 light sensors for line tracking
+        1 ultrasonic sensor
+        1 gyro sensor
 
-# TODO - The ports are hardcoded in the constructor below.  Eventually, a guy or gal would want to initialize this class 
-with what motors and sensors are being used as well as what port they are plugged into. 
+    # TODO - The ports are hardcoded in the constructor below.  Eventually, a person would want to initialize this class 
+    from child class (motors and sensors are being used at what port). A 2-D List.  The idea is this become totally
+    reuable from year to year, robot to robot, without change.  
 
-The idea is to create an abstraction class that is more easy for 4th - 8th grade to us by themselves.  
-One that uses distance traveled and stall detection. 
-
+    Toying with the idea I am creating an abstraction class that is more easy for 4th - 8th grade to use by themselves.  
+    One that uses distance traveled and stall detection.  But, mostly this is helping me learn what is most important to
+    help coach them better.    
 '''
 
-
 # Used in motor_turn.  Working theory is affected by battery level.
+# TODO - Move to Child Class
 #MOTOR_TURN_ANGLE_CALIBRATE = 1.069
 #MOTOR_TURN_ANGLE_CALIBRATE = 1.15  # 7.53 volts
 MOTOR_TURN_ANGLE_CALIBRATE = 1.06  # 8.29 volts
 
-# Sensor values
-# TODO - Move black and white sensor calibration out of this class
-LEFT_SENSOR_BLACK = 8
-LEFT_SENSOR_WHITE = 83
-RIGHT_SENSOR_BLACK = 7
-RIGHT_SENSOR_WHITE = 97
+# Default Robot Settings if not specified in child class
+WHEEL_DIAMETER = 50
+AXLE_TRACK = 100
+LEFT_SENSOR_BLACK = 5
+LEFT_SENSOR_WHITE = 90
+RIGHT_SENSOR_BLACK = 5
+RIGHT_SENSOR_WHITE = 90
 
 
 class Robot(): 
 
-    def __init__(self):
+    def __init__(
+            self, 
+            wheel_diameter = WHEEL_DIAMETER, 
+            axle_track = AXLE_TRACK,
+            left_sensor_black = LEFT_SENSOR_BLACK,
+            left_sensor_white = LEFT_SENSOR_WHITE,
+            right_sensor_black = RIGHT_SENSOR_BLACK,
+            right_sensor_white = RIGHT_SENSOR_WHITE
+        ):
 
         # Initialize the EV3.
         self.ev3 = EV3Brick()
 
+        # Intitalize the Parameters
+        self.Stop = Stop
+
+        # Initialize the light sensor black and white
+        self.left_sensor_black = left_sensor_black
+        self.left_sensor_white = left_sensor_white
+        self.right_sensor_black = right_sensor_black
+        self.right_sensor_white = right_sensor_white
+
         # Initialize the motors
-        self.front_motor = Motor(Port.C)
+        self.large_attachment_motor = Motor(Port.C)
         self.left_motor = Motor(Port.D)
         self.right_motor = Motor(Port.A)
-        self.back_motor = Motor(Port.B)
+        self.medium_attachment_motor = Motor(Port.B) 
+
+        # Messed with gear train list parameter but didn't work as expected
+        # I might not understand how it supposed to work
+        # for now just put a factor on term angle to compensate
+        # self.medium_attachment_motor = Motor(Port.B, gears=[12, 20]) 
 
         # Initialize the sensors
         self.right_line_sensor = ColorSensor(Port.S1)
@@ -59,8 +83,7 @@ class Robot():
         self.gyro_sensor = GyroSensor(Port.S2, Direction.CLOCKWISE)
         self.ultrasonic_sensor=UltrasonicSensor(Port.S3)
 
-
-        # Initialize the drive base
+        # Initialize the drive base from the Pybricks Documentation:
 
         # A robotic vehicle with two powered wheels and an optional support wheel or caster.
         # By specifying the dimensions of your robot, this class makes it easy to drive a given distance in millimeters 
@@ -77,8 +100,13 @@ class Robot():
         #    wheel_diameter (dimension: mm) – Diameter of the wheels.
         #    axle_track (dimension: mm) – Distance between the points where both wheels touch the ground.
  
-        # FIXME - Move setting to caller
-        self.drive_base = DriveBase(self.left_motor, self.right_motor, wheel_diameter=90, axle_track=127)
+        
+        self.drive_base = DriveBase(self.left_motor, self.right_motor, wheel_diameter, axle_track)
+
+        # FIXME - Remove debugging / learning code when no longer relevant
+        # self.medium_attachment_motor.control.limits(speed=5000)
+        print("medium motor max Speed = " + str(self.medium_attachment_motor.control.limits()[0]))
+        print("large motor max Speed = " + str(self.large_attachment_motor.control.limits()[0]))
 
 # Legacy Methods ============================================================================================
     def motor_straight(self, distance, speed=100, acceleration=1000):
@@ -119,57 +147,13 @@ class Robot():
         #print(self.drive_base.state())
         self.drive_base.stop()
 
-    def pid_line_follow(self, distance, speed = 80, right_or_left_sensor = "right", side_of_line = "left", 
-                        Proportional_Gain = 0.8, Integral_Gain = 0.0008, Derivative_Gain=.001):
-        
-        # TODO - Determine which code to keep?
-        # FIXME - Stops and Stalls
-        # TODO - Move PID to own class
-
-        # PID Line Follower 
-        # Mark Lucking says Builder Dude says don't use Integral_Gain if mostly straight line.
-        # Seems like the faster you go, the more Derivative_Gain you need
-
-
-        integral = 0
-        derivative = 0
-        last_error = 0
-
-        
-        if (right_or_left_sensor == "right"):
-            sensor = self.right_line_sensor
-            target = (RIGHT_SENSOR_WHITE + RIGHT_SENSOR_BLACK) / 2
-        else:
-            sensor = self.left_line_sensor
-            target = (LEFT_SENSOR_WHITE + LEFT_SENSOR_BLACK) / 2
-
-        self.drive_base.reset()
-        self.drive_base.stop()
-
-        # PID feedback loop
-        while self.drive_base.state()[0] < distance:
-            error = sensor.reflection() - target
-            integral = integral + error
-            derivative = error - last_error
-            turn_rate = Proportional_Gain * error + Integral_Gain * integral + Derivative_Gain * derivative
-            if side_of_line == "left":
-                self.right_motor.run(speed - turn_rate)
-                self.left_motor.run(speed + turn_rate)
-            else:
-                self.right_motor.run(speed + turn_rate)
-                self.left_motor.run(speed - turn_rate)
-            last_error = error
-            wait(10)
-
-        self.drive_base.stop()
-
     def follow_line_v1(self, distance, speed = 120, right_or_left_sensor = "right", side_of_line = "left", 
                         Kp = 0.8, Ki = 0.0008, Kd =.001):
         """
         Digital Magic's PID Follow Line Function Version 1
 
         History:
-           This version of the function was created by Lily Hill in January 2022 before the state tournament after the team 
+           This version of the function was created by Koen & Coach in January 2022 before the state tournament after the team 
            added a second color sensor to the other side of the robot.
           
         Notes:
@@ -256,9 +240,6 @@ class Robot():
             error = 0 - angle
             #Holy Crap, we have a pattern here!  I am writing the same code twice. 
 
-    def erickson(self, speed, degrees):
-        self.attachment_motor.run_angle(speed, degrees)
-
     def drive (self, distance = 100, speed = 120, turn_rate = 0):
         # negative speed is reverse
 
@@ -276,16 +257,27 @@ class Robot():
 
         self.drive_base.stop()
 
-    def test(self):
-        pass
-
-# Driving Methods ===========================================================================================
+# Custom Driving Methods ===========================================================================================
 
 # Attachment Motor Methods ==================================================================================
+    # NOT SURE I NEED THESE - JUST USE THE PYBRICKS COMMANDS IN Robot Specific CHILD
+    # WHAT ABOUT ACTUAL KID CODE? That would be further abastracted.  But still possible? 
+    # 
+    '''
+    def turn_large_attachment_motor(self,degrees,speed):
+        pass
+
+    def run_angle(self,rotation_angle,speed,wait=True):
+        print("desired speed: " + str(speed))
+        print("desired rotation angle: " + str(rotation_angle))
+
+        print("motor angle before: " + str(self.medium_attachment_motor.angle()))
+        self.medium_attachment_motor.run_angle(speed, rotation_angle, then=Stop.HOLD, wait=wait)
+        print("motor angle after: " + str(self.medium_attachment_motor.angle()))
+    '''       
 
 # Non-Driving Methods =======================================================================================
 
-    
     def beep(self, frequency=500, duration=200):
         '''
         Parameters:	
@@ -301,21 +293,23 @@ class Robot():
     def wait(self,time):
         wait(time)
 
-    def watch_sensors(self):
+    def watch_sensors(self,dummy):
         self.wait(1000)
         self.gyro_sensor.reset_angle(0)
         self.left_motor.reset_angle(0)
         self.right_motor.reset_angle(0)
+        self.medium_attachment_motor.reset_angle(0)
+        self.large_attachment_motor.reset_angle(0)
 
         # TODO - Put line and motors together and add ultrasonic sensor
         while (self.ev3.buttons.pressed() == []):
             self.ev3.screen.clear()
             self.ev3.screen.draw_text(1, 1, "Gyro:")
             self.ev3.screen.draw_text(100, 1, self.gyro_sensor.angle())
-            self.ev3.screen.draw_text(1, 20, "R Line:")
-            self.ev3.screen.draw_text(100, 20, self.right_line_sensor.reflection())
-            self.ev3.screen.draw_text(1, 40, "L Line:")
-            self.ev3.screen.draw_text(100, 40, self.left_line_sensor.reflection())
+            self.ev3.screen.draw_text(1, 20, "M Motor:")
+            self.ev3.screen.draw_text(100, 20, self.medium_attachment_motor.angle())
+            self.ev3.screen.draw_text(1, 40, "L Motor:")
+            self.ev3.screen.draw_text(100, 40, self.large_attachment_motor.angle())
             self.ev3.screen.draw_text(1, 60, "R Motor:")
             self.ev3.screen.draw_text(100, 60, self.right_motor.angle())
             self.ev3.screen.draw_text(1, 80, "L Motor:")
@@ -420,7 +414,7 @@ class Robot():
             # Processing different kinds of selections
             # Selected item always moves to left button
             if button == Button.LEFT:
-                menu_list[lp][1]()
+                menu_list[lp][1](menu_list[cp][2])
                 # Don't advance the menu
 
                 left = menu_list[lp][0]
@@ -428,7 +422,7 @@ class Robot():
                 right = menu_list[rp][0]
 
             elif button == Button.CENTER:
-                menu_list[cp][1]()
+                menu_list[cp][1](menu_list[cp][2])
                 # Advance the menu by 1
                 lp = cp
                 cp = rp
@@ -441,7 +435,7 @@ class Robot():
                 right = menu_list[rp][0]
 
             elif button == Button.RIGHT:
-                menu_list[rp][1]()
+                menu_list[rp][1](menu_list[cp][2])
                 # Advance the menu by 2
                 lp = rp
                 cp = rp + 1
@@ -454,7 +448,7 @@ class Robot():
                 center = menu_list[cp][0]
                 right = menu_list[rp][0]
 
-            elif button == Button.UP:
+            elif button == Button.DOWN:
                 print(button)
                 # Advance the menu by 1
                 lp = cp
@@ -467,7 +461,7 @@ class Robot():
                 center = menu_list[cp][0]
                 right = menu_list[rp][0]
 
-            elif button == Button.DOWN:
+            elif button == Button.UP:
                 print(button)
                 # Decrease the menu by 1
                 rp = cp
