@@ -108,7 +108,7 @@ class Robot():
         print("medium motor max Speed = " + str(self.medium_attachment_motor.control.limits()[0]))
         print("large motor max Speed = " + str(self.large_attachment_motor.control.limits()[0]))
 
-# Legacy Methods ============================================================================================
+#TODO Legacy Methods Eliminate or rebuild ==========================================================================
     def motor_straight(self, distance, speed=100, acceleration=1000):
 
         # FIXME - Stops and Stalls
@@ -225,14 +225,11 @@ class Robot():
 
         self.drive_base.stop()
 
-    def pid_gyro_straight(self, distance, Proportional_Gain = 1, Integral_Gain = 0, Derivative_Gain = 0):
+    def pid_gyro_straight(self, distance, PID = [0,0,0]):
         
         self.gyro_sensor.reset_angle(0)
         
         error = 0
-        last_error = 0
-        integral = 0
-        derivative = 0
 
         # PID feedback loop
         while self.drive_base.state()[0] < distance:
@@ -258,6 +255,34 @@ class Robot():
         self.drive_base.stop()
 
 # Custom Driving Methods ===========================================================================================
+    def gyro_turn_on_center(self, target_angle=90, speed=100, adjustment=1.0):
+
+        target_angle = target_angle * adjustment
+        self.gyro_sensor.reset_angle(0)
+        angle = self.gyro_sensor.angle() #take an initial reading from sensor
+        print("initial " + str(angle)) #TODO Remove when ready
+        
+        if target_angle < 0:  
+            while angle > target_angle:
+                self.left_motor.run(speed=(-1 * speed))
+                self.right_motor.run(speed=speed)
+                wait(10)
+                angle = self.gyro_sensor.angle()  # take another reading from sensor
+                print(angle)  #TODO Remove when ready
+        else:  
+            while angle < target_angle:
+                self.left_motor.run(speed=speed)
+                self.right_motor.run(speed=(-1 * speed))
+                wait(10)
+                angle = self.gyro_sensor.angle() # take another reading from sensor
+                print(angle)  #TODO Remove when ready
+
+        self.left_motor.brake()
+        self.right_motor.brake()
+
+
+    def gyro_straight(self, pid, distance=100, speed=100):
+        pass
 
 # Attachment Motor Methods ==================================================================================
     # NOT SURE I NEED THESE - JUST USE THE PYBRICKS COMMANDS IN Robot Specific CHILD
@@ -414,7 +439,7 @@ class Robot():
             # Processing different kinds of selections
             # Selected item always moves to left button
             if button == Button.LEFT:
-                menu_list[lp][1](menu_list[cp][2])
+                menu_list[lp][1](menu_list[lp][2])
                 # Don't advance the menu
 
                 left = menu_list[lp][0]
@@ -473,5 +498,4 @@ class Robot():
                 left = menu_list[lp][0]
                 center = menu_list[cp][0]
                 right = menu_list[rp][0]
-
-        
+  

@@ -11,9 +11,8 @@ from vdr2022 import VDR2022
 Starting with a strategy similar to that of team #44519 Digital Magic in 2021, Digital Voodoo chose missions
 based on trade-offs between complexity and points.
 '''
-from missions import eastern_adventure
-from missions import dead_reckon_helicopter
-from missions import blade, test
+from missions import eastern_adventure, blade, dead_reckon_helicopter
+from test import *
 
 # creating a Voodoo Ranger 2022 object here
 # all the robot specific setting are CONSTANTS in the VDR class
@@ -24,28 +23,18 @@ vdr = VDR2022()
 # vdr.say("Go Go Voodoo Ranger")
 vdr.beep(200)
 
-# FIXME - Remove these pre-menu test function calls in the end
-test(vdr)
-
 
 # creating a 2D list for the Voodoo Ranger menu system
 # Columns ["Menu Name", Function to call, Parameter]
-# TODO - Change Parameters to a list
+
 vdr_menu_list = [
-    ["Mission1",vdr.beep,100],
-    ["Test",test,vdr],
-    ["Mission3",vdr.beep,200],   
-    ["Mission4",vdr.beep,300],
+    ["Test Stall",test_stall,vdr],
+    ["Gyro Turn OC",test_gyro_turn_on_center,vdr], 
+    ["Testing pid",testing_pid,vdr],  
+    ["Gyro Straight",test_gyro_straight,vdr],
     ["Mission5",vdr.beep,400],
     ["Mission6",vdr.beep,500],
     ["Mission7",vdr.beep,600],
-    ["Mission8",vdr.beep,700],
-    ["Mission9",vdr.beep,800],
-    ["Mission10",vdr.beep,900],
-    ["Mission11",vdr.beep,200],
-    ["Mission12",vdr.beep,200],
-    ["Mission13",vdr.beep,200],
-    ["Mission14",vdr.beep,200],
     ["Watch Sensors",vdr.watch_sensors,"dummy"]
 ]
 

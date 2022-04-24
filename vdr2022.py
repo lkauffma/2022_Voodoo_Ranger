@@ -16,6 +16,8 @@ LEFT_SENSOR_WHITE = 83      # reading when left sensor is on white line
 RIGHT_SENSOR_BLACK = 7      # reading when right sensor is on black line 
 RIGHT_SENSOR_WHITE = 97     # reading when right sensor is on white line
 
+GYRO_TURN_ON_CENTER_ADJUSTMENT = 1.0  #calibrate for precise turns
+
 
 class VDR2022(Robot):
     def __init__(self):
@@ -45,3 +47,13 @@ class VDR2022(Robot):
         Robot.run_angle(speed=1000,rotation_angle=calibrated_angle, wait=True)
         Robot.run_angle(speed=1000,rotation_angle=calibrated_angle, wait=True)
     '''
+
+    def test_stall(self, speed):
+        print(self.right_motor.control.stall_tolerances())
+        # while not self.right_motor.control.stalled():
+        self.right_motor.run_until_stalled(speed)
+        print("done")
+
+    def gyro_turn_on_center(self, target_angle=90, speed=100):
+        super().gyro_turn_on_center(target_angle=90, speed=100, adjustment=GYRO_TURN_ON_CENTER_ADJUSTMENT)
+
