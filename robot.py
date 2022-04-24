@@ -255,8 +255,44 @@ class Robot():
         self.drive_base.stop()
 
 # Custom Driving Methods ===========================================================================================
+    def gyro_turn_on_centerx(self, target_angle=90, speed=100, adjustment=1.0):
+
+        print("speed in robot" + str(speed))
+        target_angle = target_angle * adjustment
+        self.gyro_sensor.reset_angle(0)
+        angle = self.gyro_sensor.angle() #take an initial reading from sensor
+        print("initial " + str(angle)) #TODO Remove when ready
+
+        mid_target_angle = target_angle/2
+        
+        if target_angle < 0:  
+            while angle > target_angle:
+
+                if angle > mid_target_angle:
+                    speed = speed * TURN_ACCELERATION
+                else:
+                    speed = speed * TURN_ACCELERATION
+
+
+                self.left_motor.run(speed=(-1 * speed))
+                self.right_motor.run(speed=speed)
+                wait(10)
+                angle = self.gyro_sensor.angle()  # take another reading from sensor
+                print(angle)  #TODO Remove when ready
+        else:  
+            while angle < target_angle:
+                self.left_motor.run(speed=speed)
+                self.right_motor.run(speed=(-1 * speed))
+                wait(10)
+                angle = self.gyro_sensor.angle() # take another reading from sensor
+                print(angle)  #TODO Remove when ready
+
+        self.left_motor.brake()
+        self.right_motor.brake()
+
     def gyro_turn_on_center(self, target_angle=90, speed=100, adjustment=1.0):
 
+        print("speed in robot" + str(speed))
         target_angle = target_angle * adjustment
         self.gyro_sensor.reset_angle(0)
         angle = self.gyro_sensor.angle() #take an initial reading from sensor
@@ -279,7 +315,6 @@ class Robot():
 
         self.left_motor.brake()
         self.right_motor.brake()
-
 
     def gyro_straight(self, pid, distance=100, speed=100):
         pass
@@ -385,24 +420,21 @@ class Robot():
                 self.ev3.screen.draw_text(1, 1, l)
                 self.ev3.screen.draw_text(70, 1, u)
                 self.ev3.screen.draw_text(150, 1, r)
-                self.ev3.screen.draw_text(75, 20, "Gyro:")
-                self.ev3.screen.draw_text(140, 20, g)
+                self.ev3.screen.draw_text(1, 20, "Gyro:")
+                self.ev3.screen.draw_text(70, 20, g)
 
             pl = l
             pr = r
             pu = u
             pg = g
 
-            self.ev3.screen.draw_text(1, 20, "UP")
             
-            self.ev3.screen.draw_text(1, 40, "LT=" + left)
+            self.ev3.screen.draw_text(1, 60, "LT=" + left)
 
-            self.ev3.screen.draw_text(1, 60, "CT=" + center)
+            self.ev3.screen.draw_text(1, 80, "CT=" + center)
 
-            self.ev3.screen.draw_text(1, 80, "RT=" + right)
+            self.ev3.screen.draw_text(1, 100, "RT=" + right)
             
-            self.ev3.screen.draw_text(1, 100, "DOWN ")
-
 
             pressed = self.ev3.buttons.pressed()
 

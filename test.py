@@ -33,6 +33,8 @@ def testing_pid(robot):
     print(test_pid_2.adjustment(0))
 
 def test_gyro_turn_on_center(robot):
+    robot.wait(1000)
+    print("Hello From Test")
     robot.gyro_turn_on_center(target_angle=-90, speed=100)
 
 def test_gyro_straight(robot):
