@@ -29,9 +29,9 @@ vdr.beep(200)
 
 vdr_menu_list = [
     ["Test Stall",test_stall,vdr],
+    ["Gyro Straight",test_gyro_straight,vdr],
     ["Gyro Turn OC",test_gyro_turn_on_center,vdr], 
     ["Testing pid",testing_pid,vdr],  
-    ["Gyro Straight",test_gyro_straight,vdr],
     ["Mission5",vdr.beep,400],
     ["Mission6",vdr.beep,500],
     ["Mission7",vdr.beep,600],

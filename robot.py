@@ -225,18 +225,6 @@ class Robot():
 
         self.drive_base.stop()
 
-    def pid_gyro_straight(self, distance, PID = [0,0,0]):
-        
-        self.gyro_sensor.reset_angle(0)
-        
-        error = 0
-
-        # PID feedback loop
-        while self.drive_base.state()[0] < distance:
-            angle = self.gyro_sensor.angle()
-            error = 0 - angle
-            #Holy Crap, we have a pattern here!  I am writing the same code twice. 
-
     def drive (self, distance = 100, speed = 120, turn_rate = 0):
         # negative speed is reverse
 
@@ -317,7 +305,17 @@ class Robot():
         self.right_motor.brake()
 
     def gyro_straight(self, pid, distance=100, speed=100):
-        pass
+        self.gyro_sensor.reset_angle(0)
+
+        while self.drive_base.state()[0] < distance:
+            angle = self.gyro_sensor.angle()
+            error = 0 - angle
+            adjustment = pid.adjustment(error)
+            turn_rate = (angle - adjustment) * -1  #TODO Move the sign change to class?  
+            print(angle, turn_rate)
+            self.drive_base.drive(speed, turn_rate) 
+            wait(10)ls
+
 
 # Attachment Motor Methods ==================================================================================
     # NOT SURE I NEED THESE - JUST USE THE PYBRICKS COMMANDS IN Robot Specific CHILD
