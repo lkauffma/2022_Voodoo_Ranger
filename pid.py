@@ -1,6 +1,6 @@
 #!/usr/bin/env pybricks-micropython
 
-# This creates an object to use to calculate the adjustment in PID feedback loops
+# This creates an object to use to calculate the adjustment in PID feedback loops x
 
 class PID():
     def __init__(self, Kp=0.0, Ki=0.0, Kd=0.0):
